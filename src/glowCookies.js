@@ -3,6 +3,10 @@
     CREATED BY MANUEL CARRILLO
     https://github.com/manucaralmo/GlowCookies
     2021 - v 3.1.3
+
+    MODIFIED BY TOBY @ WEBSCRIPT
+    16/04/2024
+    Check whether script element exists before re-requesting.
 */
 
 class GlowCookies {
@@ -120,13 +124,22 @@ class GlowCookies {
   activateTracking() {
     // Google Analytics Tracking
     if (this.tracking.AnalyticsCode) {
-      let Analytics = document.createElement("script");
-      Analytics.setAttribute("src", `https://www.googletagmanager.com/gtag/js?id=${this.tracking.AnalyticsCode}`);
-      document.head.appendChild(Analytics);
+      if (!document.getElementById("googleTagManager")) {
+        let Analytics = document.createElement("script");
+        Analytics.setAttribute("src", `https://www.googletagmanager.com/gtag/js?id=${this.tracking.AnalyticsCode}`);
+        Analytics.setAttribute("id", "googleTagManager");
+        document.head.appendChild(Analytics);
+      }
       let AnalyticsData = document.createElement("script");
       AnalyticsData.text = `window.dataLayer = window.dataLayer || [];
                                 function gtag(){dataLayer.push(arguments);}
                                 gtag('js', new Date());
+                                gtag('consent', 'update', {
+                                    'ad_storage': 'granted',
+                                    'analytics_storage': 'granted',
+                                    'ad_personalization': 'granted',
+                                    'ad_user_data': 'granted'
+                                });
                                 gtag('config', '${this.tracking.AnalyticsCode}');`;
       document.head.appendChild(AnalyticsData);
     }
@@ -147,12 +160,16 @@ class GlowCookies {
                                     fbq('track', 'PageView');
                                 `;
       document.head.appendChild(FacebookPixelData);
-      let FacebookPixel = document.createElement("noscript");
-      FacebookPixel.setAttribute("height", `1`);
-      FacebookPixel.setAttribute("width", `1`);
-      FacebookPixel.setAttribute("style", `display:none`);
-      FacebookPixel.setAttribute("src", `https://www.facebook.com/tr?id=${this.tracking.FacebookPixelCode}&ev=PageView&noscript=1`);
-      document.head.appendChild(FacebookPixel);
+
+      if (!document.getElementById("facebookPixel")) {
+        let FacebookPixel = document.createElement("noscript");
+        FacebookPixel.setAttribute("height", `1`);
+        FacebookPixel.setAttribute("width", `1`);
+        FacebookPixel.setAttribute("style", `display:none`);
+        FacebookPixel.setAttribute("src", `https://www.facebook.com/tr?id=${this.tracking.FacebookPixelCode}&ev=PageView&noscript=1`);
+        FacebookPixel.setAttribute("id", "facebookPixel");
+        document.head.appendChild(FacebookPixel);
+      }
     }
 
     // Hotjar Tracking
@@ -175,13 +192,23 @@ class GlowCookies {
   disableTracking() {
     // Google Analytics Tracking ('client_storage': 'none')
     if (this.tracking.AnalyticsCode) {
-      let Analytics = document.createElement("script");
-      Analytics.setAttribute("src", `https://www.googletagmanager.com/gtag/js?id=${this.tracking.AnalyticsCode}`);
-      document.head.appendChild(Analytics);
+      if (!document.getElementById("googleTagManager")) {
+        let Analytics = document.createElement("script");
+        Analytics.setAttribute("src", `https://www.googletagmanager.com/gtag/js?id=${this.tracking.AnalyticsCode}`);
+        Analytics.setAttribute("id", "googleTagManager");
+        document.head.appendChild(Analytics);
+      }
       let AnalyticsData = document.createElement("script");
       AnalyticsData.text = `window.dataLayer = window.dataLayer || [];
                         function gtag(){dataLayer.push(arguments);}
                         gtag('js', new Date());
+                        // from: https://stackoverflow.com/questions/58801416/disabling-cookies-in-google-analytics-gtag-js
+                        gtag('consent', 'update', {
+                            'ad_storage': 'denied',
+                            'analytics_storage': 'denied',
+                            'ad_personalization': 'denied',
+                            'ad_user_data': 'denied'
+                        });
                         gtag('config', '${this.tracking.AnalyticsCode}' , {
                             'client_storage': 'none',
                             'anonymize_ip': true
