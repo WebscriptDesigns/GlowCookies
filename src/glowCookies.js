@@ -122,28 +122,6 @@ class GlowCookies {
   }
 
   activateTracking() {
-    // Google Analytics Tracking
-    if (this.tracking.AnalyticsCode) {
-      if (!document.getElementById("googleTagManager")) {
-        let Analytics = document.createElement("script");
-        Analytics.setAttribute("src", `https://www.googletagmanager.com/gtag/js?id=${this.tracking.AnalyticsCode}`);
-        Analytics.setAttribute("id", "googleTagManager");
-        document.head.appendChild(Analytics);
-      }
-      let AnalyticsData = document.createElement("script");
-      AnalyticsData.text = `window.dataLayer = window.dataLayer || [];
-                                function gtag(){dataLayer.push(arguments);}
-                                gtag('js', new Date());
-                                gtag('consent', 'update', {
-                                    'ad_storage': 'granted',
-                                    'analytics_storage': 'granted',
-                                    'ad_personalization': 'granted',
-                                    'ad_user_data': 'granted'
-                                });
-                                gtag('config', '${this.tracking.AnalyticsCode}');`;
-      document.head.appendChild(AnalyticsData);
-    }
-
     // Facebook pixel tracking code
     if (this.tracking.FacebookPixelCode) {
       let FacebookPixelData = document.createElement("script");
